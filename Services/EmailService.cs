@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Text.Encodings.Web;
 
 namespace AceJobAgency.Services
 {
@@ -12,9 +13,8 @@ namespace AceJobAgency.Services
         private readonly string _smtpPassword;
         private readonly string _fromEmail;
         private readonly string _fromName;
-        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfiguration configuration)
         {
             _smtpHost = configuration["Email:SmtpHost"] ?? "mail.smtp2go.com";
             _smtpPort = int.TryParse(configuration["Email:SmtpPort"], out var port) ? port : 587;
@@ -25,37 +25,27 @@ namespace AceJobAgency.Services
                 ?? throw new ArgumentNullException("SMTP2GO API key not configured");
             _fromEmail = configuration["Email:FromEmail"] ?? "noreply@acejobagency.com";
             _fromName = configuration["Email:FromName"] ?? "Ace Job Agency";
-            _logger = logger;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string htmlContent)
+        private async Task SendEmailInternalAsync(string toEmail, string subject, string htmlContent)
         {
-            try
-            {
-                using var message = new MailMessage();
-                message.From = new MailAddress(_fromEmail, _fromName);
-                message.To.Add(new MailAddress(toEmail));
-                message.Subject = subject;
-                message.Body = htmlContent;
-                message.IsBodyHtml = true;
+            using var message = new MailMessage();
+            message.From = new MailAddress(_fromEmail, _fromName);
+            message.To.Add(new MailAddress(toEmail));
+            message.Subject = subject;
+            message.Body = htmlContent;
+            message.IsBodyHtml = true;
 
-                using var client = new SmtpClient(_smtpHost, _smtpPort);
-                client.EnableSsl = _smtpUseSsl;
-                client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+            using var client = new SmtpClient(_smtpHost, _smtpPort);
+            client.EnableSsl = _smtpUseSsl;
+            client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
 
-                await client.SendMailAsync(message);
-                
-                _logger.LogInformation($"Email sent successfully to {toEmail}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error sending email to {toEmail}");
-                throw;
-            }
+            await client.SendMailAsync(message);
         }
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
         {
+            var safeResetLink = HtmlEncoder.Default.Encode(resetLink);
             var subject = "Password Reset Request - Ace Job Agency";
             var htmlContent = $@"
                 <!DOCTYPE html>
@@ -83,10 +73,10 @@ namespace AceJobAgency.Services
                             <p>We received a request to reset your password for your Ace Job Agency account.</p>
                             <p>Click the button below to reset your password:</p>
                             <center>
-                                <a href='{resetLink}' class='button'>Reset Password</a>
+                                <a href='{safeResetLink}' class='button'>Reset Password</a>
                             </center>
                             <p>Or copy and paste this link into your browser:</p>
-                            <p style='word-break: break-all;'><a href='{resetLink}'>{resetLink}</a></p>
+                            <p style='word-break: break-all;'><a href='{safeResetLink}'>{safeResetLink}</a></p>
                             <div class='warning'>
                                 <strong>Important:</strong> This link will expire in 1 hour for security reasons.
                             </div>
@@ -99,7 +89,7 @@ namespace AceJobAgency.Services
                 </body>
                 </html>";
 
-            await SendEmailAsync(toEmail, subject, htmlContent);
+            await SendEmailInternalAsync(toEmail, subject, htmlContent);
         }
     }
 }

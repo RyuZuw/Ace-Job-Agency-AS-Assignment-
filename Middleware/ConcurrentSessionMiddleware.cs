@@ -7,12 +7,10 @@ namespace AceJobAgency.Middleware
     public class ConcurrentSessionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ConcurrentSessionMiddleware> _logger;
 
-        public ConcurrentSessionMiddleware(RequestDelegate next, ILogger<ConcurrentSessionMiddleware> logger)
+        public ConcurrentSessionMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context, ISessionService sessionService)
@@ -45,8 +43,6 @@ namespace AceJobAgency.Middleware
                     
                     if (!isValid)
                     {
-                        _logger.LogWarning($"Invalid or expired session detected for user {userId}");
-                        
                         // Sign out the user (Identity uses "Identity.Application" scheme)
                         await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ApplicationScheme);
                         context.Session.Clear();

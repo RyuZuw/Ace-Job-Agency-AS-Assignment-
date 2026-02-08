@@ -24,7 +24,6 @@ namespace AceJobAgency.Controllers
         private readonly ISessionService _sessionService;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -37,8 +36,7 @@ namespace AceJobAgency.Controllers
             ITwoFactorService twoFactorService,
             ISessionService sessionService,
             IWebHostEnvironment environment,
-            IConfiguration configuration,
-            ILogger<AccountController> logger)
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -51,7 +49,6 @@ namespace AceJobAgency.Controllers
             _sessionService = sessionService;
             _environment = environment;
             _configuration = configuration;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -151,7 +148,6 @@ namespace AceJobAgency.Controllers
             await _sessionService.TerminateAllSessionsAsync(user.Id, sessionId);
 
             await _auditLogService.LogActivityAsync(user.Id, "Login", "Account", "User logged in successfully");
-            _logger.LogInformation($"User {user.Email} logged in successfully");
 
             return RedirectToLocal(returnUrl);
         }
@@ -218,7 +214,6 @@ namespace AceJobAgency.Controllers
             await _sessionService.TerminateAllSessionsAsync(user.Id, sessionId);
 
             await _auditLogService.LogActivityAsync(user.Id, "TwoFactor", "Account", "2FA verification successful");
-            _logger.LogInformation($"User {user.Email} logged in with 2FA");
 
             return RedirectToLocal(returnUrl);
         }
@@ -348,7 +343,6 @@ namespace AceJobAgency.Controllers
                 await _userManager.AddToRoleAsync(user, "Member");
 
                 await _auditLogService.LogActivityAsync(user.Id, "Register", "Account", "User registered successfully");
-                _logger.LogInformation($"User {user.Email} registered successfully");
 
                 // Sign in the user
                 await _signInManager.SignInAsync(user, isPersistent: false);
@@ -391,7 +385,6 @@ namespace AceJobAgency.Controllers
                 await _auditLogService.LogActivityAsync(userId, "Logout", "Account", "User logged out");
             }
 
-            _logger.LogInformation("User logged out");
             return RedirectToAction("Login");
         }
 
@@ -430,9 +423,8 @@ namespace AceJobAgency.Controllers
                 await _emailService.SendPasswordResetEmailAsync(model.Email, callbackUrl!);
                 await _auditLogService.LogActivityAsync(user.Id, "ForgotPassword", "Account", "Password reset email sent");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Failed to send password reset email");
                 ModelState.AddModelError(string.Empty, "Failed to send password reset email. Please try again later.");
                 return View(model);
             }
@@ -502,7 +494,6 @@ namespace AceJobAgency.Controllers
                 await _userManager.UpdateAsync(user);
 
                 await _auditLogService.LogActivityAsync(user.Id, "ResetPassword", "Account", "Password reset successful");
-                _logger.LogInformation($"User {user.Email} reset their password");
 
                 return RedirectToAction("ResetPasswordConfirmation");
             }
@@ -577,7 +568,6 @@ namespace AceJobAgency.Controllers
                 await _signInManager.RefreshSignInAsync(user);
 
                 await _auditLogService.LogActivityAsync(user.Id, "ChangePassword", "Account", "Password changed successfully");
-                _logger.LogInformation($"User {user.Email} changed their password");
 
                 TempData["SuccessMessage"] = "Your password has been changed successfully.";
                 return RedirectToAction("Profile", "Home");
@@ -675,7 +665,6 @@ namespace AceJobAgency.Controllers
             await _userManager.UpdateAsync(currentUser);
 
             await _auditLogService.LogActivityAsync(currentUser.Id, "EnableTwoFactor", "Account", "2FA enabled successfully");
-            _logger.LogInformation($"User {currentUser.Email} enabled 2FA");
 
             TempData["SuccessMessage"] = "Two-factor authentication has been enabled successfully.";
             return RedirectToAction("Profile", "Home");
@@ -698,7 +687,6 @@ namespace AceJobAgency.Controllers
             await _userManager.UpdateAsync(user);
 
             await _auditLogService.LogActivityAsync(user.Id, "DisableTwoFactor", "Account", "2FA disabled");
-            _logger.LogInformation($"User {user.Email} disabled 2FA");
 
             TempData["SuccessMessage"] = "Two-factor authentication has been disabled.";
             return RedirectToAction("Profile", "Home");

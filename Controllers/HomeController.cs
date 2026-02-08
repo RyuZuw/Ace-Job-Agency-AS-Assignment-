@@ -15,20 +15,17 @@ namespace AceJobAgency.Controllers
         private readonly IEncryptionService _encryptionService;
         private readonly IAuditLogService _auditLogService;
         private readonly ISessionService _sessionService;
-        private readonly ILogger<HomeController> _logger;
 
         public HomeController(
             UserManager<ApplicationUser> userManager,
             IEncryptionService encryptionService,
             IAuditLogService auditLogService,
-            ISessionService sessionService,
-            ILogger<HomeController> logger)
+            ISessionService sessionService)
         {
             _userManager = userManager;
             _encryptionService = encryptionService;
             _auditLogService = auditLogService;
             _sessionService = sessionService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -61,7 +58,6 @@ namespace AceJobAgency.Controllers
             catch
             {
                 decryptedNRIC = "****";
-                _logger.LogWarning($"Failed to decrypt NRIC for user {user.Email}");
             }
 
             // Get recent activity

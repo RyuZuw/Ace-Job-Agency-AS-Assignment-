@@ -8,14 +8,12 @@ namespace AceJobAgency.Services
         private readonly string _secretKey;
         private readonly string _siteKey;
         private readonly HttpClient _httpClient;
-        private readonly ILogger<RecaptchaService> _logger;
 
-        public RecaptchaService(IConfiguration configuration, HttpClient httpClient, ILogger<RecaptchaService> logger)
+        public RecaptchaService(IConfiguration configuration, HttpClient httpClient)
         {
             _secretKey = configuration["Recaptcha:SecretKey"] ?? throw new ArgumentNullException("Recaptcha secret key not configured");
             _siteKey = configuration["Recaptcha:SiteKey"] ?? throw new ArgumentNullException("Recaptcha site key not configured");
             _httpClient = httpClient;
-            _logger = logger;
         }
 
         public string GetSiteKey()
@@ -27,7 +25,6 @@ namespace AceJobAgency.Services
         {
             if (string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("reCaptcha token is empty");
                 return false;
             }
 
@@ -39,7 +36,6 @@ namespace AceJobAgency.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogError("reCaptcha API request failed");
                     return false;
                 }
 
@@ -48,22 +44,19 @@ namespace AceJobAgency.Services
 
                 if (result == null)
                 {
-                    _logger.LogError("Failed to deserialize reCaptcha response");
                     return false;
                 }
 
                 // For reCaptcha v3, check score (0.0 to 1.0, where 1.0 is very likely a good interaction)
                 if (result.Score.HasValue && result.Score.Value < 0.5)
                 {
-                    _logger.LogWarning($"reCaptcha score too low: {result.Score.Value}");
                     return false;
                 }
 
                 return result.Success;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Error validating reCaptcha token");
                 return false;
             }
         }

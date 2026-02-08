@@ -144,3 +144,4 @@ C:\Users\corbi\Downloads\AceJobAgency\obj\Debug\net8.0\refint\AceJobAgency.dll
 C:\Users\corbi\Downloads\AceJobAgency\obj\Debug\net8.0\AceJobAgency.pdb
 C:\Users\corbi\Downloads\AceJobAgency\obj\Debug\net8.0\AceJobAgency.genruntimeconfig.cache
 C:\Users\corbi\Downloads\AceJobAgency\obj\Debug\net8.0\ref\AceJobAgency.dll
+C:\Users\corbi\Downloads\AceJobAgency\obj\Debug\net8.0\AceJobAgency.sourcelink.json
