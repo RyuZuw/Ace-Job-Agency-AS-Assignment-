@@ -27,22 +27,6 @@ namespace AceJobAgency.Services
             _fromName = configuration["Email:FromName"] ?? "Ace Job Agency";
         }
 
-        private async Task SendEmailInternalAsync(string toEmail, string subject, string htmlContent)
-        {
-            using var message = new MailMessage();
-            message.From = new MailAddress(_fromEmail, _fromName);
-            message.To.Add(new MailAddress(toEmail));
-            message.Subject = subject;
-            message.Body = htmlContent;
-            message.IsBodyHtml = true;
-
-            using var client = new SmtpClient(_smtpHost, _smtpPort);
-            client.EnableSsl = _smtpUseSsl;
-            client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
-
-            await client.SendMailAsync(message);
-        }
-
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
         {
             var safeResetLink = HtmlEncoder.Default.Encode(resetLink);
@@ -89,7 +73,18 @@ namespace AceJobAgency.Services
                 </body>
                 </html>";
 
-            await SendEmailInternalAsync(toEmail, subject, htmlContent);
+            using var message = new MailMessage();
+            message.From = new MailAddress(_fromEmail, _fromName);
+            message.To.Add(new MailAddress(toEmail));
+            message.Subject = subject;
+            message.Body = htmlContent;
+            message.IsBodyHtml = true;
+
+            using var client = new SmtpClient(_smtpHost, _smtpPort);
+            client.EnableSsl = _smtpUseSsl;
+            client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+
+            await client.SendMailAsync(message);
         }
     }
 }
