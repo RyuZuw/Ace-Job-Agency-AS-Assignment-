@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Text.Encodings.Web;
 
 namespace AceJobAgency.Services
@@ -77,8 +78,11 @@ namespace AceJobAgency.Services
             message.From = new MailAddress(_fromEmail, _fromName);
             message.To.Add(new MailAddress(toEmail));
             message.Subject = subject;
-            message.Body = htmlContent;
-            message.IsBodyHtml = true;
+            message.Body = "Password reset instructions are available in the HTML version of this email.";
+            message.IsBodyHtml = false;
+
+            var htmlView = AlternateView.CreateAlternateViewFromString(htmlContent, null, MediaTypeNames.Text.Html);
+            message.AlternateViews.Add(htmlView);
 
             using var client = new SmtpClient(_smtpHost, _smtpPort);
             client.EnableSsl = _smtpUseSsl;
