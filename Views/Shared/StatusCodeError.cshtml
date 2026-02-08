@@ -1,0 +1,60 @@
+@{
+    var statusCode = ViewBag.StatusCode ?? 500;
+    var statusMessage = statusCode switch
+    {
+        404 => "Page Not Found",
+        403 => "Access Forbidden",
+        500 => "Internal Server Error",
+        _ => "An Error Occurred"
+    };
+    
+    var description = statusCode switch
+    {
+        404 => "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+        403 => "You don't have permission to access this resource.",
+        500 => "An unexpected error occurred on our server. Please try again later.",
+        _ => "An unexpected error occurred. Please try again later."
+    };
+    
+    var icon = statusCode switch
+    {
+        404 => "bi-search",
+        403 => "bi-shield-exclamation",
+        _ => "bi-exclamation-triangle"
+    };
+    
+    var color = statusCode switch
+    {
+        404 => "text-info",
+        403 => "text-warning",
+        _ => "text-danger"
+    };
+    
+    ViewData["Title"] = statusMessage;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h1 class="display-1 fw-bold @color">@statusCode</h1>
+                <i class="bi @icon @color" style="font-size: 4rem;"></i>
+                <h4 class="mt-4">@statusMessage</h4>
+                <p class="text-muted">
+                    @description
+                </p>
+                <div class="mt-4">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                        <i class="bi bi-house me-2"></i>Go to Home
+                    </a>
+                    @if (statusCode == 404)
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary ms-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

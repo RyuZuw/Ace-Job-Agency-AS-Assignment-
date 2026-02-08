@@ -1,0 +1,223 @@
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Register</h4>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="John" />
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Doe" />
+                                <label asp-for="LastName" class="form-label"></label>
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="Gender" class="form-select" aria-required="true">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <label asp-for="Gender" class="form-label"></label>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="NRIC" class="form-control text-uppercase" autocomplete="off" aria-required="true" placeholder="S1234567A" maxlength="9" />
+                                <label asp-for="NRIC" class="form-label"></label>
+                                <span asp-validation-for="NRIC" class="text-danger"></span>
+                                <div class="form-text">Format: S1234567A (Singapore NRIC)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" autocomplete="email" aria-required="true" placeholder="name@example.com" />
+                        <label asp-for="Email" class="form-label"></label>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" id="passwordInput" />
+                                <label asp-for="Password" class="form-label"></label>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="confirm password" />
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Strength Indicator -->
+                    <div class="mb-3" id="passwordStrengthContainer" style="display: none;">
+                        <label class="form-label small">Password Strength</label>
+                        <div class="progress" style="height: 8px;">
+                            <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small id="passwordStrengthText" class="text-muted"></small>
+                        <small id="passwordStrengthHint" class="text-muted d-block"></small>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="DateOfBirth" class="form-control" type="date" aria-required="true" />
+                        <label asp-for="DateOfBirth" class="form-label"></label>
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Resume" class="form-label"></label>
+                        <input asp-for="Resume" class="form-control" type="file" accept=".pdf,.docx" />
+                        <span asp-validation-for="Resume" class="text-danger"></span>
+                        <div class="form-text">Accepted formats: PDF, DOCX (Max 5MB)</div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="WhoAmI" class="form-control" style="height: 100px;" placeholder="Tell us about yourself"></textarea>
+                        <label asp-for="WhoAmI" class="form-label"></label>
+                        <span asp-validation-for="WhoAmI" class="text-danger"></span>
+                    </div>
+
+                    <!-- Hidden field for reCaptcha token -->
+                    <input type="hidden" asp-for="RecaptchaToken" id="recaptchaToken" />
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="bi bi-person-plus me-2"></i>Register
+                        </button>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="text-center">
+                        <p class="mb-0">Already have an account? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Login here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4 border-info">
+            <div class="card-body">
+                <h6 class="card-title text-info"><i class="bi bi-shield-check me-2"></i>Password Requirements</h6>
+                <ul class="small text-muted mb-0">
+                    <li>At least 12 characters long</li>
+                    <li>At least one uppercase letter (A-Z)</li>
+                    <li>At least one lowercase letter (a-z)</li>
+                    <li>At least one number (0-9)</li>
+                    <li>At least one special character (!@@#$%^&*)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // reCaptcha v3
+        (function() {
+            var form = document.getElementById('registerForm');
+            var submitting = false;
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.ready(function() {
+                    form.addEventListener('submit', function(e) {
+                        if (submitting) return;
+                        e.preventDefault();
+                        submitting = true;
+                        grecaptcha.execute('@ViewBag.RecaptchaSiteKey', { action: 'register' }).then(function(token) {
+                            document.getElementById('recaptchaToken').value = token;
+                            form.submit();
+                        }).catch(function() {
+                            form.submit();
+                        });
+                    });
+                });
+            }
+        })();
+
+        // Password strength indicator + strong gating
+        (function() {
+            const passwordInput = document.getElementById('passwordInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const container = document.getElementById('passwordStrengthContainer');
+            const bar = document.getElementById('passwordStrengthBar');
+            const text = document.getElementById('passwordStrengthText');
+            const hint = document.getElementById('passwordStrengthHint');
+
+            function updateStrength(password) {
+                if (password.length === 0) {
+                    container.style.display = 'none';
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                container.style.display = 'block';
+
+                let strength = 0;
+                if (password.length >= 12) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+                const percentage = (strength / 5) * 100;
+                bar.style.width = percentage + '%';
+
+                if (strength <= 2) {
+                    bar.className = 'progress-bar bg-danger';
+                    text.textContent = 'Weak';
+                } else if (strength <= 4) {
+                    bar.className = 'progress-bar bg-warning';
+                    text.textContent = 'Medium';
+                } else {
+                    bar.className = 'progress-bar bg-success';
+                    text.textContent = 'Strong';
+                }
+
+                const isStrong = strength === 5;
+                submitBtn.disabled = !isStrong;
+                hint.textContent = isStrong ? 'Strong password confirmed.' : 'Use a strong password to enable registration.';
+            }
+
+            submitBtn.disabled = true;
+            passwordInput.addEventListener('input', function(e) {
+                updateStrength(e.target.value);
+            });
+
+            updateStrength(passwordInput.value || '');
+        })();
+
+        // NRIC uppercase conversion
+        document.querySelector('input[name="NRIC"]').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+}

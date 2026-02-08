@@ -1,0 +1,63 @@
+<script>
+// Lightweight client-side validation to replace broken jQuery Validate
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply validation on all forms with data-val attributes
+        document.querySelectorAll('form').forEach(function(form) {
+            var inputs = form.querySelectorAll('[data-val="true"]');
+            inputs.forEach(function(input) {
+                var span = form.querySelector('[data-valmsg-for="' + input.name + '"]');
+                input.addEventListener('blur', function() { validateField(input, span); });
+                input.addEventListener('input', function() {
+                    if (span && span.textContent) validateField(input, span);
+                });
+            });
+        });
+    });
+
+    function validateField(input, span) {
+        var val = input.value.trim();
+        var msg = '';
+
+        if (input.getAttribute('data-val-required') && !val) {
+            msg = input.getAttribute('data-val-required');
+        } else if (val && input.getAttribute('data-val-email')) {
+            if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(val)) msg = input.getAttribute('data-val-email');
+        } else if (val && input.getAttribute('data-val-regex')) {
+            var pattern = new RegExp(input.getAttribute('data-val-regex-pattern'));
+            if (!pattern.test(val)) msg = input.getAttribute('data-val-regex');
+        } else if (val && input.getAttribute('data-val-minlength')) {
+            var min = parseInt(input.getAttribute('data-val-minlength-min'));
+            if (val.length < min) msg = input.getAttribute('data-val-minlength');
+        } else if (val && input.getAttribute('data-val-maxlength')) {
+            var max = parseInt(input.getAttribute('data-val-maxlength-max'));
+            if (val.length > max) msg = input.getAttribute('data-val-maxlength');
+        } else if (val && input.getAttribute('data-val-equalto')) {
+            var otherId = input.getAttribute('data-val-equalto-other').replace('*.', '');
+            var other = input.form.querySelector('[name$="' + otherId + '"]');
+            if (other && val !== other.value) msg = input.getAttribute('data-val-equalto');
+        }
+
+        if (span) {
+            span.textContent = msg;
+            span.className = msg ? 'text-danger field-validation-error' : 'text-danger field-validation-valid';
+        }
+        if (msg) {
+            input.classList.add('input-validation-error');
+        } else {
+            input.classList.remove('input-validation-error');
+        }
+    }
+
+    // Expose for forms that need it
+    window.validateForm = function(form) {
+        var valid = true;
+        form.querySelectorAll('[data-val="true"]').forEach(function(input) {
+            var span = form.querySelector('[data-valmsg-for="' + input.name + '"]');
+            validateField(input, span);
+            if (span && span.textContent) valid = false;
+        });
+        return valid;
+    };
+})();
+</script>

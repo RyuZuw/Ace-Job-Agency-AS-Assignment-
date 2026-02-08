@@ -1,0 +1,18 @@
+# Visual Studio temporary files
+.vs/
+[Bb]in/
+[Ob]j/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docuser
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# OS generated files
+.DS_Store
+Thumbs.db
